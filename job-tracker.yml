@@ -1,0 +1,49 @@
+name: Job Tracker
+
+on:
+  schedule:
+    # 4 times per day at 07:00, 13:00, 19:00, 01:00 UTC
+    # (midnight, 6am, noon, 6pm Pacific)
+    - cron: "0 1,7,13,19 * * *"
+  workflow_dispatch:  # allow manual runs from the Actions tab
+
+permissions:
+  contents: write  # needed to commit updated seen_jobs.json back
+
+jobs:
+  check-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        env:
+          EMAIL_SENDER:    ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD:  ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          # Optional overrides; default to Gmail
+          SMTP_SERVER:     ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT:       ${{ secrets.SMTP_PORT }}
+        run: python scraper.py
+
+      - name: Commit updated state
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ -n "$(git status --porcelain seen_jobs.json)" ]]; then
+            git add seen_jobs.json
+            git commit -m "chore: update seen_jobs.json [skip ci]"
+            git push
+          else
+            echo "No state changes to commit."
+          fi
