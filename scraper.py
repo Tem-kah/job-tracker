@@ -145,8 +145,8 @@ def send_email(new_jobs: list[dict]) -> None:
     sender = os.environ["EMAIL_SENDER"]
     password = os.environ["EMAIL_PASSWORD"]
     recipient = os.environ["EMAIL_RECIPIENT"]
-    smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_server = os.environ.get("SMTP_SERVER") or "smtp.gmail.com"
+    smtp_port = int(os.environ.get("SMTP_PORT") or "587")
 
     subject = f"🔔 {len(new_jobs)} new job posting(s) matched"
 
