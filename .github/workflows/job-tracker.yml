@@ -31,9 +31,7 @@ jobs:
           EMAIL_SENDER:    ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD:  ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
-          # Optional overrides; default to Gmail
-          SMTP_SERVER:     ${{ secrets.SMTP_SERVER }}
-          SMTP_PORT:       ${{ secrets.SMTP_PORT }}
+        
         run: python scraper.py
 
       - name: Commit updated state
